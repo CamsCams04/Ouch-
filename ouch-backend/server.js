@@ -13,18 +13,12 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// ─── CORS (autorise Vercel + local) ───────────────────────────────────────
-const ALLOWED = [
-  process.env.FRONTEND_URL || "http://localhost:5173",
-  "https://ouch-one.vercel.app/",
-  "http://localhost:5173",
-];
-
-app.use(cors({ origin: ALLOWED, credentials: true }));
+// ─── CORS ───────────────────────────────────────────────────────────────────
+app.use(cors({ origin: "*", credentials: false }));
 app.use(express.json());
 
 const io = new Server(httpServer, {
-  cors: { origin: ALLOWED, methods: ["GET", "POST"] },
+  cors: { origin: "*", methods: ["GET", "POST"] },
 });
 
 // ─── MONGOOSE SCHEMAS ─────────────────────────────────────────────────────
