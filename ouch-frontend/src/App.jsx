@@ -421,18 +421,18 @@ function PageWaiting({ room, user, onStart, onBack }) {
 }
 
 // 5. DUEL ROOM (core gameplay)
-function PageDuel({ room: initialRoom, user, onStats, onBack }) {
+function PageDuel({ room: initialRoom, user, myUserId, onStats, onBack }) {
   const [room, setRoom] = useState(initialRoom);
   const [selectedCat, setSelectedCat] = useState(room.categories?.[0] || "Général");
   const [floatLabels, setFloatLabels] = useState([]);
   const [shaking, setShaking] = useState(null);
   const [popping, setPopping] = useState(null);
-  const myId = room.members[0]?.userId || room.members[0]?.id;
-
-const punch = (targetId) => {
-  socket.emit("punch", { code: room.inviteCode || room.code, targetId, category: selectedCat });
-  // animations locales comme avant
-};
+  const myId = myUserId;
+  
+  const punch = (targetId) => {
+    socket.emit("punch", { code: room.inviteCode || room.code, targetId, category: selectedCat });
+    // animations locales comme avant
+  };
 
 // Écoute les updates en temps réel
 useEffect(() => {
@@ -661,6 +661,13 @@ export default function App() {
   const [page, setPage] = useState("login");
   const [user, setUser] = useState(null);
   const [room, setRoom] = useState(null);
+  const [myUserId] = useState(() => {
+    const stored = localStorage.getItem("ouch_user_id");
+    if (stored) return stored;
+    const newId = uid();
+    localStorage.setItem("ouch_user_id", newId);
+    return newId;
+  });
 
   const handleLogin = (u) => { setUser(u); setPage("home"); };
   const handleCreate = () => setPage("create");
@@ -672,7 +679,7 @@ export default function App() {
     body: JSON.stringify({
       name: r.name,
       categories: r.categories,
-      userId: "u_me",
+      userId: myUserId,
       userName: user.name,
       userAvatar: user.avatar,
     }),
@@ -691,7 +698,7 @@ const handleJoin = (code) => {
   // Rejoint via Socket.io
   socket.emit("join_room", {
     code,
-    userId: "u_me",
+    userId: myUserId,
     userName: user?.name || "Toi",
     userAvatar: user?.avatar || "🐯",
   }, (response) => {
@@ -722,6 +729,7 @@ const handleJoin = (code) => {
       {page === "duel" && room && (
         <PageDuel
           room={room} user={user}
+          myUserId={myUserId}
           onStats={() => setPage("stats")}
           onBack={() => setPage("home")}
         />
