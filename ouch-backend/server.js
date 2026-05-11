@@ -16,7 +16,8 @@ const httpServer = createServer(app);
 // ─── CORS (autorise Vercel + local) ───────────────────────────────────────
 const ALLOWED = [
   process.env.FRONTEND_URL || "http://localhost:5173",
-  "https://ouch-app.vercel.app",
+  "https://ouch-one.vercel.app/",
+  "http://localhost:5173",
 ];
 
 app.use(cors({ origin: ALLOWED, credentials: true }));
